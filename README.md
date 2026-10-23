@@ -21,3 +21,18 @@
 
 ## 五、声明
 HTTP 仅用于教学对比，实际服务优先 HTTPS。
+
+# 校园巡检（实验三）
+
+## 运行方法
+1. 用 Android Studio 打开工程，等待 Gradle Sync 完成。
+2. 连接真机或启动模拟器。
+3. 点击 Run，桌面应用名为“校园巡检”。
+
+## 三个文件职责
+- `MainActivity.kt`：系统入口，设置 Compose 内容，持有巡检状态，安排请求并更新结果。
+- `InspectionScreen.kt`：显示巡检数据、两个请求按钮及结果文本，计算未检查数量。
+- `InspectionNetwork.kt`：创建 OkHttpClient，以挂起函数方式执行 HTTPS 请求，处理响应和异常。
+
+## 请求说明
+本实验使用公共回显服务 `https://httpbin.org/get?room=...`，仅用于验证参数传递与网络接入，不保存巡检记录，也不是从真实服务器获取巡检任务。Room、DataStore、WorkManager 留待后续实验。
