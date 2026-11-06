@@ -84,6 +84,13 @@ fun InspectionScreen(controller: InspectionController, onBack: () -> Unit) {
                     // TODO 3：计算已完成数量
                     val done = state.tasks.count { it.status == "已完成" }
 
+                    // TODO 6：根据 pendingOnly 筛选数据
+                    val visibleTasks = if (pendingOnly) {
+                        state.tasks.filter { it.status == "待巡检" }
+                    } else {
+                        state.tasks
+                    }
+
                     // 显示统计信息（注意：这里用的是完整的 state.tasks）
                     Text(
                         "${controller.room} · 共${state.tasks.size}项 · " +
@@ -92,7 +99,27 @@ fun InspectionScreen(controller: InspectionController, onBack: () -> Unit) {
                         style = MaterialTheme.typography.titleSmall
                     )
 
-                    val visibleTasks = state.tasks
+                    // TODO 6：增加筛选按钮
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = !pendingOnly,
+                            onClick = { pendingOnly = false },
+                            label = { Text("全部") },
+                            modifier = Modifier.testTag("filter_all")
+                        )
+                        FilterChip(
+                            selected = pendingOnly,
+                            onClick = { pendingOnly = true },
+                            label = { Text("仅看待巡检") },
+                            modifier = Modifier.testTag("filter_pending")
+                        )
+                    }
+
+                    // 显示当前列表的数量
+                    Text(
+                        "当前显示 ${visibleTasks.size} 项",
+                        modifier = Modifier.testTag("visibleCount")
+                    )
 
                     // TODO 4：使用 LazyColumn 展示可见的列表
                     LazyColumn(
