@@ -81,16 +81,30 @@ fun InspectionScreen(controller: InspectionController, onBack: () -> Unit) {
                     OutlinedButton(onClick = { controller.load(retry = true) }, modifier = Modifier.testTag("retry")) { Text("重试") }
                 }
                 LoadPhase.SUCCESS -> {
-                    // TODO 3：从任务列表计算已完成数量，不能写死。
-                    val done = 0
-                    Text("${controller.room} · 共${state.tasks.size}项 · 待巡检${state.tasks.size - done}项 · 已完成${done}项",
-                        modifier = Modifier.testTag("summary"), style = MaterialTheme.typography.titleSmall)
-                    // TODO 6：增加“全部／仅看待巡检”按钮，更新pendingOnly。
-                    // 根据pendingOnly筛选state.tasks，计算visibleTasks，并显示当前显示数量。
-                    // 此处起点直接使用全部数据；完成后A203仅待巡检为5项，A204为1项。
+                    // TODO 3：计算已完成数量
+                    val done = state.tasks.count { it.status == "已完成" }
+
+                    // 显示统计信息（注意：这里用的是完整的 state.tasks）
+                    Text(
+                        "${controller.room} · 共${state.tasks.size}项 · " +
+                                "待巡检${state.tasks.size - done}项 · 已完成${done}项",
+                        modifier = Modifier.testTag("summary"),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
                     val visibleTasks = state.tasks
-                    // TODO 4：使用LazyColumn、items和InspectionTaskCard展示visibleTasks。
-                    Text("TODO 4：请在此显示任务列表")
+
+                    // TODO 4：使用 LazyColumn 展示可见的列表
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f), // 占满剩余空间，实现滚动
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(visibleTasks, key = { it.id }) { task ->
+                            InspectionTaskCard(task)
+                        }
+                    }
                 }
             }
         }
@@ -100,9 +114,36 @@ fun InspectionScreen(controller: InspectionController, onBack: () -> Unit) {
 @Composable
 fun InspectionTaskCard(task: InspectionTask) {
     Card(Modifier.fillMaxWidth().testTag("task_${task.id}")) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            // TODO 5：用Row组织名称和状态；名称用weight(1f)；下方显示编号和位置。
-            Text("待补全的任务卡片")
+        Column(
+            Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // TODO 5：第一行 Row，显示设备名称和状态
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = task.deviceName,
+                    modifier = Modifier.weight(1f), // 关键点：占满剩余空间，长名字会自动换行
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = task.status,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (task.status == "已完成") {
+                        MaterialTheme.colorScheme.primary // 已完成的颜色
+                    } else {
+                        MaterialTheme.colorScheme.error // 待巡检的颜色（一般用红色提醒）
+                    }
+                )
+            }
+            // 第二行：任务编号和位置
+            Text(
+                text = "${task.id} · ${task.location}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

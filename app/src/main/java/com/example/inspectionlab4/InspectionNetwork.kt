@@ -36,7 +36,18 @@ suspend fun loadInspectionTasks(
     val array = root.getJSONArray("tasks")
     // TODO 1：遍历array，将四个字段映射为InspectionTask，返回List。
     // 起点返回空列表，仅保证骨架可运行，不代表解析已完成。
-    emptyList<InspectionTask>()
+    // 用 List 来循环遍历服务器返回的 array 数组
+    List(array.length()) { index ->
+        // 取出第 index 个 JSON 对象
+        val item = array.getJSONObject(index)
+        // 读取里面的四个字段，并造一个 InspectionTask 对象
+        InspectionTask(
+            id = item.getString("id"),
+            deviceName = item.getString("deviceName"),
+            location = item.getString("location"),
+            status = item.getString("status")
+        )
+    }
 }
 
 // 教师提供的桥接代码：取消协程时，同时取消OkHttp Call。
